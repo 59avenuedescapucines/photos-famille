@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.PhotosFamille" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#E4572E</item>
+        <item name="colorPrimaryDark">#E4572E</item>
+        <item name="android:statusBarColor">#E4572E</item>
+        <item name="android:windowBackground">#FFFAF2</item>
+    </style>
+</resources>

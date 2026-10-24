@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Photos de famille</title>
+<meta name="theme-color" content="#e4572e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --paper:#fffaf2; --card:#ffffff; --ink:#2a2230; --muted:#6e6577; --line:#f0e3d2;
+  --accent:#e4572e; --accent-ink:#ffffff; --soft:#ffe9c9; --ok:#2f6b3f; --warn:#c4281c;
+  --radius:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#1f1a24; --card:#2a2430; --ink:#f6eee6; --muted:#b9adc0; --line:#3c3345; --accent:#ff7a52; --accent-ink:#1f1a24; --soft:#4a3a2c; --ok:#7bc08c; --warn:#ff9b8f;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.5 Georgia,"Times New Roman",serif;padding-bottom:env(safe-area-inset-bottom)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 10px}
+header.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between}
+h1{font-size:1.25rem;margin:0;font-weight:700;letter-spacing:.2px}
+.who{font-size:.85rem;color:var(--muted);text-align:right;line-height:1.25}
+.btn{border:1.5px solid var(--accent);background:var(--card);color:var(--accent);border-radius:999px;padding:12px 20px;min-height:48px;font-weight:700}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.big{min-height:60px;font-size:1.1rem;width:100%;border-radius:var(--radius)}
+.btn.danger{border-color:var(--warn);color:var(--warn)}
+.btn.small{min-height:40px;padding:6px 14px;font-size:.9rem}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.search{width:100%;padding:14px 18px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);margin:16px 0 8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px;scrollbar-width:thin}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 16px;min-height:44px;font-size:.95rem}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.count{color:var(--muted);font-size:.9rem;margin:4px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;padding-bottom:40px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column}
+.tile .ph{aspect-ratio:4/3;background:var(--soft);display:grid;place-items:center;color:var(--muted);font-size:.85rem;overflow:hidden}
+.tile .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.tile .cap{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px}
+.tile .when{font-weight:700;font-size:.95rem}
+.tile .who2{font-size:.85rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.badge{align-self:flex-start;margin-top:6px;background:var(--soft);border-radius:999px;padding:2px 10px;font-size:.8rem}
+.badge.zero{background:transparent;color:var(--muted);padding-left:0}
+.back{margin:14px 0}
+.photo-frame{background:#000;border-radius:var(--radius);overflow:hidden;min-height:200px;display:grid;place-items:center}
+.photo-frame img{max-width:100%;max-height:72vh;display:block;margin:0 auto}
+.photo-title{margin:14px 0 4px;font-size:1.3rem;line-height:1.3}
+.photo-sub{color:var(--muted);margin:0 0 14px;font-size:.95rem}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:16px 0}
+.panel h2{font-size:1.05rem;margin:0 0 8px}
+.synth{background:var(--soft);border-color:transparent}
+.synth small{color:var(--muted)}
+.comment{border-top:1px solid var(--line);padding:14px 0}
+.comment:first-of-type{border-top:0}
+.c-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.c-head b{font-size:1.02rem}
+.c-head time{color:var(--muted);font-size:.85rem}
+.c-text{white-space:pre-wrap;margin:6px 0}
+.c-trans{color:var(--muted);font-size:.92rem;font-style:italic;margin:6px 0}
+.c-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+audio{width:100%;margin:6px 0}
+textarea{width:100%;min-height:110px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.row>*{flex:1 1 200px}
+.rec-live{display:flex;align-items:center;gap:12px;margin:10px 0;font-weight:700}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--warn);animation:pulse 1.1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.msg{padding:12px 14px;border-radius:12px;margin:12px 0;background:var(--soft)}
+.msg.err{background:color-mix(in srgb,var(--warn) 18%,var(--card));border:1px solid var(--warn)}
+.hint{color:var(--muted);font-size:.9rem}
+.center{text-align:center;padding:48px 16px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px 4px}
+.nav button{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 16px;min-height:44px;font-size:.95rem;font-weight:700}
+.nav button[aria-current=page]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.nav .n{background:var(--warn);color:#fff;border-radius:999px;padding:0 8px;margin-left:6px;font-size:.8rem}
+.status{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;margin-top:6px}
+.status.wait{background:var(--soft)} .status.no{background:color-mix(in srgb,var(--warn) 20%,var(--card));color:var(--warn)}
+.review{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.review .ph{aspect-ratio:4/3;background:var(--soft);border-radius:12px;overflow:hidden;display:grid;place-items:center}
+.review .ph img{width:100%;height:100%;object-fit:contain;background:#000}
+.drop{display:block;text-align:center;border:2px dashed var(--accent);border-radius:var(--radius);padding:26px 12px;color:var(--accent);font-weight:700;cursor:pointer}
+.previews{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin:12px 0}
+.previews div{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--soft)}
+.previews img{width:100%;height:100%;object-fit:cover}
+.previews .st{position:absolute;inset:auto 0 0 0;background:rgba(0,0,0,.6);color:#fff;font-size:.75rem;padding:2px 6px;text-align:center}
+/* ===== Diaporama ===== */
+.ss{position:fixed;inset:0;z-index:50;background:#0d0a10;color:#fff;display:flex;flex-direction:column}
+.ss-stage{flex:1;min-height:0;display:grid;place-items:center;position:relative;overflow:hidden}
+.ss-stage img{max-width:100%;max-height:100%;object-fit:contain;animation:fade .8s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.ss-stage img{animation:none}}
+.ss-load{color:#ccc;font-size:1rem}
+.ss-cap{padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:#0d0a10;flex:none;max-height:52vh;overflow:auto}
+.ss-cap h2{margin:0 0 4px;font-size:1.15rem}
+.ss-cap .sub{color:#e5d9cc;font-size:.9rem;margin-bottom:6px}
+.ss-text{font-size:1.05rem;line-height:1.45;max-height:22vh;overflow:auto;margin:6px 0 10px}
+.ss-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+.ss-bar button{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:999px;min-height:52px;min-width:52px;padding:8px 16px;font-weight:700}
+.ss-bar button.main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ss-bar button[aria-pressed=true]{background:#fff;color:#111}
+.ss-progress{height:4px;background:rgba(255,255,255,.2);position:absolute;left:0;right:0;top:0}
+.ss-progress i{display:block;height:100%;background:var(--accent);width:0}
+.ss-toast{z-index:3;position:absolute;left:50%;top:18px;transform:translateX(-50%);background:#fff;color:#111;border-radius:999px;padding:10px 18px;display:flex;gap:12px;align-items:center;max-width:92vw}
+.ss-toast button{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;padding:4px}
+.ss.idle .ss-cap .ss-bar{opacity:0;pointer-events:none}
+.range{width:100%;accent-color:var(--accent)}
+.opt{display:flex;gap:12px;align-items:center;padding:10px 0;min-height:48px}
+.opt input[type=checkbox]{width:26px;height:26px;accent-color:var(--accent)}
+.banlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.banlist .it{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.banlist .ph{aspect-ratio:4/3;background:var(--soft);display:grid;place-items:center;font-size:.8rem;color:var(--muted);overflow:hidden}
+.banlist .ph img{width:100%;height:100%;object-fit:cover}
+.banlist .btn{margin:6px;min-height:40px;padding:4px 10px;font-size:.85rem}
+
+.banner{display:flex;gap:12px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:var(--radius);padding:12px 14px;margin:14px 0 4px}
+.banner .t{flex:1;white-space:pre-wrap}
+.banner small{display:block;color:var(--muted)}
+.hidden{display:none!important}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1 id="title">Photos de famille</h1>
+  <div class="who" id="who"></div>
+</div></header>
+
+<nav class="wrap nav" id="nav" aria-label="Sections"></nav>
+<main class="wrap" id="app" aria-live="polite">
+  <div class="center">Chargement…</div>
+</main>
+
+<script src="config.js"></script>
+<script>
+'use strict';
+/* ========= Outils ========= */
+/* replaceChildren/append natifs écrivent « null » pour une valeur vide : on les filtre */
+['replaceChildren','append'].forEach(m => { const o = Element.prototype[m]; Element.prototype[m] = function(...k){ return o.apply(this, k.flat().filter(x => x != null && x !== false)); }; });
+const $app = document.getElementById('app');
+function h(tag, attrs, ...kids){
+  const e = document.createElement(tag);
+  for (const k in (attrs||{})) {
+    const v = attrs[k];
+    if (v === false || v == null) continue;
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (k === 'text') e.textContent = v;
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  kids.flat().forEach(c => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); });
+  return e;
+}
+function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(e){} return null; }
+
+const params = new URLSearchParams(location.search);
+let CODE = params.get('c') || store('pf_code') || '';
+if (params.get('c')) { store('pf_code', params.get('c')); history.replaceState(null, '', location.pathname); }
+
+async function api(fn, ...args){
+  let r;
+  try {
+    r = await fetch(window.PF_API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({fn, args:[CODE, ...args]}) });
+  } catch(e){ throw new Error('Pas de connexion. Réessayez dans un instant.'); }
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'Erreur inconnue.');
+  return j.data;
+}
+
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+function fdate(iso){ const d = new Date(iso); if (isNaN(d)) return ''; return d.getDate()+' '+MOIS[d.getMonth()]+' '+d.getFullYear(); }
+function whenLabel(w){ if (/^\d{4}$/.test(w)) return w; const m = /^(\d{4})s$/.exec(w); if (m) return 'Années '+m[1].slice(0,3)+'0'; const d = /^(\d{2,4})s?$/.exec(w); return w.replace(/_/g,' ') || 'Date inconnue'; }
+function decade(w){ const m = /^(\d{4})s?$/.exec(w); if (!m) return 'Date inconnue'; return Math.floor(+m[1]/10)*10 + 's'; }
+function tagLabel(t){ return t.replace(/-/g,' '); }
+
+/* ========= État ========= */
+const S = { me:null, membres:[], photos:[], depots:[], bans:new Set(), synths:{}, msgs:[], tab:'photos', q:'', person:'', dec:'', thumbs:new Map(), scroll:0, back:null };
+
+/* ========= Démarrage ========= */
+async function boot(){
+  if (!window.PF_API_URL || window.PF_API_URL.startsWith('A_REMPLIR')) return fail('L’application n’est pas encore configurée (adresse du serveur manquante).');
+  if (!CODE) return noCode();
+  try {
+    const hi = await api('hello');
+    S.me = hi.me; S.membres = hi.membres;
+    document.getElementById('who').replaceChildren(h('div',{},'Bonjour '+S.me.nom.split(' ')[0]), S.me.role==='admin' ? h('div',{class:'hint'},'administrateur') : null);
+    S.back = showGallery;
+    api('listDepots').then(d => { S.depots = d; drawNav(); }).catch(()=>{});
+    api('bans').then(b => { S.bans = new Set(b); }).catch(()=>{});
+    loadSynths();
+    api('messages').then(m => { S.msgs = m; if (view==='gallery') drawGallery(); }).catch(()=>{});
+    bridgeApp();
+    drawNav();
+    await showGallery();
+  } catch(e){
+    if (/lien personnel/i.test(e.message)) { store('pf_code', null); return noCode(e.message); }
+    fail(e.message);
+  }
+}
+function fail(m){ $app.replaceChildren(h('div',{class:'msg err'}, m), h('button',{class:'btn',onclick:()=>location.reload()},'Réessayer')); }
+function noCode(m){
+  $app.replaceChildren(h('div',{class:'center'},
+    h('h2',{},'Bienvenue 👋'),
+    h('p',{}, m || 'Pour entrer, ouvrez le lien personnel que Mathieu vous a envoyé.'),
+    h('p',{class:'hint'},'Chaque membre de la famille a son propre lien. Il permet d’afficher votre nom à côté de vos commentaires.')));
+}
+
+/* ========= Galerie ========= */
+async function showGallery(){
+  S.tab = 'photos'; S.back = showGallery; drawNav();
+  if (!S.photos.length) {
+    $app.replaceChildren(h('div',{class:'center'},'Chargement des photos…'));
+    S.photos = dedupe(await api('listPhotos'));
+  } else { api('listPhotos').then(p => { S.photos = dedupe(p); if (view==='gallery') drawGallery(); }).catch(()=>{}); }
+  view = 'gallery';
+  drawGallery();
+  window.scrollTo(0, S.scroll||0);
+}
+let view = '';
+function dedupe(list){ list.forEach(p => { p.tags = [...new Set(p.tags)]; }); return list; }
+
+function filtered(){
+  const q = S.q.trim().toLowerCase();
+  return S.photos.filter(p =>
+    (!S.person || p.tags.includes(S.person)) &&
+    (!S.dec || decade(p.when) === S.dec) &&
+    (!q || (tagLabel(p.tags.join(' '))+' '+p.when).toLowerCase().includes(q)));
+}
+function drawGallery(){
+  const list = filtered();
+  const personsInPhotos = new Set(); S.photos.forEach(p => p.tags.forEach(t => personsInPhotos.add(t)));
+  const people = S.membres.filter(m => personsInPhotos.has(m.tag));
+  const decs = [...new Set(S.photos.map(p => decade(p.when)))].sort();
+
+  const search = h('input',{class:'search',type:'search',placeholder:'Chercher un prénom, un lieu, une année…','aria-label':'Chercher',value:S.q,
+    oninput:e=>{ S.q=e.target.value; refreshGrid(); }});
+  const chipsP = h('div',{class:'chips',role:'group','aria-label':'Filtrer par personne'},
+    h('button',{class:'chip','aria-pressed':String(!S.person),onclick:()=>{S.person='';drawGallery();}},'Tout le monde'),
+    people.map(m => h('button',{class:'chip','aria-pressed':String(S.person===m.tag),onclick:()=>{S.person=(S.person===m.tag?'':m.tag);drawGallery();}}, m.nom)));
+  const chipsD = h('div',{class:'chips',role:'group','aria-label':'Filtrer par époque'},
+    h('button',{class:'chip','aria-pressed':String(!S.dec),onclick:()=>{S.dec='';drawGallery();}},'Toutes les époques'),
+    decs.map(d => h('button',{class:'chip','aria-pressed':String(S.dec===d),onclick:()=>{S.dec=(S.dec===d?'':d);drawGallery();}}, d)));
+  const grid = h('div',{class:'grid',id:'grid'});
+  const cnt = h('div',{class:'count',id:'cnt'});
+  const ssBtn = h('button',{class:'btn primary small',onclick:showSlideshowSetup,style:'margin:0 0 12px'},'▶ Lancer le diaporama');
+  $app.replaceChildren(msgBanner(), search, chipsP, chipsD, h('div',{style:'display:flex;gap:12px;align-items:center;flex-wrap:wrap'}, cnt, ssBtn), grid);
+  fillGrid();
+}
+function refreshGrid(){ fillGrid(); }
+function fillGrid(){
+  const list = filtered();
+  document.getElementById('cnt').textContent = list.length + (list.length>1?' photos':' photo') + (S.photos.length!==list.length ? ' sur '+S.photos.length : '');
+  const grid = document.getElementById('grid');
+  grid.replaceChildren(...list.map(tile));
+  observe(grid);
+}
+function tile(p){
+  const ph = h('div',{class:'ph','data-id':p.id},'…');
+  return h('button',{class:'tile','aria-label':whenLabel(p.when)+', '+p.tags.map(tagLabel).join(', '), onclick:()=>{S.scroll=window.scrollY; showPhoto(p);}},
+    ph,
+    h('div',{class:'cap'},
+      h('span',{class:'when'},whenLabel(p.when)),
+      h('span',{class:'who2'},p.tags.map(tagLabel).join(', ')),
+      h('span',{class:'badge'+(p.nbComm?'':' zero')}, p.nbComm ? '💬 '+p.nbComm+(p.hasSynth?' · résumé':'') : 'Aucun commentaire')));
+}
+/* Chargement paresseux des miniatures, 3 à la fois */
+let io, queue = [], active = 0;
+function observe(root){
+  if (io) io.disconnect();
+  io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ io.unobserve(en.target); enqueue(en.target); } }), {rootMargin:'300px'});
+  root.querySelectorAll('.ph').forEach(el => {
+    const c = S.thumbs.get(el.dataset.id);
+    if (c) setImg(el, c); else io.observe(el);
+  });
+}
+function setImg(el, src){ el.replaceChildren(h('img',{src, alt:'', loading:'lazy'})); }
+function enqueue(el){ queue.push(el); pump(); }
+function pump(){
+  while (active < 3 && queue.length){
+    const el = queue.shift(); active++;
+    api('image', el.dataset.id, 'thumb').then(src => { S.thumbs.set(el.dataset.id, src); if (el.isConnected) setImg(el, src); })
+      .catch(()=>{ if (el.isConnected) el.textContent = 'Aperçu indisponible'; })
+      .finally(()=>{ active--; pump(); });
+  }
+}
+
+/* ========= Fiche photo ========= */
+let rec = null; // enregistrement en cours
+async function showPhoto(p){
+  view = 'photo'; stopRecCleanup();
+  window.scrollTo(0,0);
+  const frame = h('div',{class:'photo-frame'}, S.thumbs.has(p.id) ? h('img',{src:S.thumbs.get(p.id),alt:''}) : 'Chargement de la photo…');
+  const synthBox = h('div'); const listBox = h('div',{class:'panel'}); const composer = h('div',{class:'panel'});
+  $app.replaceChildren(
+    h('button',{class:'btn back',onclick:()=>{ stopRecCleanup(); (S.back||showGallery)(); }},'← Retour'),
+    frame,
+    h('h2',{class:'photo-title'}, p.title || p.tags.map(tagLabel).join(', ') || 'Photo'),
+    h('p',{class:'photo-sub'}, p.sub || whenLabel(p.when)),
+    banToggle(p), synthBox, listBox, composer);
+  api('image', p.id, 'big').then(src => { const im = new Image(); im.alt = p.title || p.tags.map(tagLabel).join(', '); im.src = src; frame.replaceChildren(im); }).catch(()=>{});
+  async function reload(){
+    try {
+      const d = await api('photo', p.id);
+      drawSynth(synthBox, d.synth);
+      drawComments(listBox, d.comments, p, reload);
+      p.nbComm = d.comments.length;
+    } catch(e){ listBox.replaceChildren(h('div',{class:'msg err'}, e.message)); }
+  }
+  drawComposer(composer, p, reload);
+  reload();
+}
+function drawSynth(box, s){
+  if (!s) { box.replaceChildren(); return; }
+  box.replaceChildren(h('div',{class:'panel synth'}, h('h2',{},'Ce que la famille raconte'), h('div',{class:'c-text'}, s.texte),
+    h('small',{}, 'Résumé automatique, mis à jour le '+fdate(s.maj)+'.')));
+}
+function drawComments(box, list, p, reload){
+  box.replaceChildren(h('h2',{},'Commentaires et souvenirs ('+list.length+')'));
+  if (!list.length) box.append(h('p',{class:'hint'},'Personne n’a encore commenté cette photo. Soyez le premier à raconter ce que vous savez.'));
+  list.forEach(c => box.append(commentView(c, reload)));
+}
+function commentView(c, reload){
+  const root = h('div',{class:'comment'});
+  const body = h('div');
+  const actions = h('div',{class:'c-actions'});
+  function show(){
+    body.replaceChildren(c.texte ? h('div',{class:'c-text'}, c.texte) : null,
+      c.hasAudio ? audioView(c) : null,
+      c.transcription ? h('div',{class:'c-trans'}, '« '+c.transcription+' »') : null);
+    actions.replaceChildren();
+    if (c.canEdit){
+      actions.append(h('button',{class:'btn small',onclick:edit},'Modifier'), h('button',{class:'btn small danger',onclick:askDel},'Supprimer'));
+    }
+  }
+  function edit(){
+    const t = h('textarea',{'aria-label':'Modifier le texte'}, c.texte);
+    const tt = c.hasAudio ? h('textarea',{'aria-label':'Modifier la transcription'}, c.transcription||'') : null;
+    body.replaceChildren(t, tt ? h('div',{class:'hint'},'Transcription de l’audio :') : null, tt);
+    actions.replaceChildren(
+      h('button',{class:'btn small primary',onclick:async e=>{ e.target.disabled=true; try{ await api('edit', c.id, t.value, tt?tt.value:null); reload(); }catch(x){ body.append(h('div',{class:'msg err'},x.message)); e.target.disabled=false; } }},'Enregistrer'),
+      h('button',{class:'btn small',onclick:show},'Annuler'));
+  }
+  function askDel(){
+    actions.replaceChildren(h('span',{},'Supprimer définitivement ? '),
+      h('button',{class:'btn small danger',onclick:async e=>{ e.target.disabled=true; try{ await api('delete', c.id); reload(); }catch(x){ body.append(h('div',{class:'msg err'},x.message)); } }},'Oui, supprimer'),
+      h('button',{class:'btn small',onclick:show},'Non'));
+  }
+  root.append(h('div',{class:'c-head'}, h('b',{}, c.auteur_nom + (c.mine?' (vous)':'')), h('time',{datetime:c.date}, fdate(c.date))), body, actions);
+  show();
+  return root;
+}
+function audioView(c){
+  const wrap = h('div');
+  const b = h('button',{class:'btn small',onclick:async()=>{
+    b.disabled = true; b.textContent = 'Chargement de l’audio…';
+    try { const src = await api('audio', c.id); const a = h('audio',{controls:true,src}); wrap.replaceChildren(a); a.play().catch(()=>{}); }
+    catch(e){ b.disabled=false; b.textContent='▶ Écouter le témoignage'; wrap.append(h('div',{class:'msg err'},e.message)); }
+  }},'▶ Écouter le témoignage');
+  wrap.append(b); return wrap;
+}
+
+/* ========= Saisie : texte + témoignage vocal ========= */
+function drawComposer(box, p, reload){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const canRec = !!(navigator.mediaDevices && window.MediaRecorder);
+  let audio = null;          // {blob, mime, url}
+  let transcript = '';
+  const ta = h('textarea',{placeholder:'Écrivez ici ce que vous savez de cette photo : qui, où, quand, une anecdote…','aria-label':'Votre commentaire'});
+  const recBox = h('div'); const status = h('div'); const trBox = h('div');
+  const send = h('button',{class:'btn primary big',onclick:submit},'Publier mon commentaire');
+  function idle(){
+    recBox.replaceChildren();
+    if (audio) {
+      recBox.append(h('div',{class:'hint'},'Votre témoignage enregistré :'), h('audio',{controls:true,src:audio.url}),
+        h('div',{class:'row'}, h('button',{class:'btn',onclick:()=>{audio=null;transcript='';idle();}},'Recommencer'), ''));
+      trBox.replaceChildren(h('div',{class:'hint'},'Texte du témoignage (vous pouvez le corriger) :'),
+        h('textarea',{id:'trans','aria-label':'Transcription'}, transcript));
+    } else {
+      trBox.replaceChildren();
+      if (canRec) recBox.append(h('button',{class:'btn big',onclick:startRec},'🎙️ Raconter à voix haute'));
+      else recBox.append(h('p',{class:'hint'},'L’enregistrement vocal n’est pas disponible sur cet appareil ou ce navigateur : vous pouvez écrire votre commentaire.'));
+    }
+  }
+  async function startRec(){
+    status.replaceChildren();
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+    catch(e){ status.replaceChildren(h('div',{class:'msg err'},'Le micro n’est pas accessible. Autorisez-le dans votre navigateur, ou écrivez votre commentaire.')); return; }
+    const types = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+    const mime = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+    const mr = new MediaRecorder(stream, mime ? {mimeType:mime} : {});
+    const chunks = []; let t0 = Date.now(); let sr = null; let said = '';
+    mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    mr.onstop = () => {
+      stream.getTracks().forEach(t => t.stop()); clearInterval(rec.timer); try{ sr && sr.stop(); }catch(e){}
+      const type = mr.mimeType || mime || 'audio/webm';
+      const blob = new Blob(chunks, {type});
+      audio = {blob, mime:type, url:URL.createObjectURL(blob)}; transcript = said.trim(); rec = null; idle();
+    };
+    // Transcription automatique gratuite du navigateur (si disponible) : facultative, corrigeable.
+    if (SR) { try {
+      sr = new SR(); sr.lang = 'fr-FR'; sr.continuous = true; sr.interimResults = false;
+      sr.onresult = ev => { for (let i = ev.resultIndex; i < ev.results.length; i++) if (ev.results[i].isFinal) said += ev.results[i][0].transcript + ' '; };
+      sr.onerror = () => {}; sr.start();
+    } catch(e){ sr = null; } }
+    mr.start();
+    const clock = h('span',{},'0:00');
+    rec = { mr, stream, timer: setInterval(()=>{ const s = Math.floor((Date.now()-t0)/1000); clock.textContent = Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); if (s >= 600) mr.stop(); }, 500) };
+    recBox.replaceChildren(h('div',{class:'rec-live'}, h('span',{class:'dot'}), 'Enregistrement en cours ', clock),
+      h('button',{class:'btn primary big',onclick:()=>mr.stop()},'⏹ Terminer l’enregistrement'));
+  }
+  async function submit(){
+    const tr = document.getElementById('trans');
+    if (!ta.value.trim() && !audio) { status.replaceChildren(h('div',{class:'msg err'},'Écrivez quelques mots ou enregistrez un témoignage.')); return; }
+    send.disabled = true; send.textContent = 'Envoi en cours…'; status.replaceChildren();
+    try {
+      let payload = null;
+      if (audio) payload = { mime: audio.mime, b64: await toB64(audio.blob) };
+      await api('add', p.id, ta.value, payload, tr ? tr.value : '');
+      ta.value = ''; audio = null; transcript = ''; idle();
+      status.replaceChildren(h('div',{class:'msg'},'Merci ! Votre contribution est enregistrée.'));
+      reload();
+    } catch(e){ status.replaceChildren(h('div',{class:'msg err'}, e.message + ' Votre texte est conservé, vous pouvez réessayer.')); }
+    send.disabled = false; send.textContent = 'Publier mon commentaire';
+  }
+  box.append(h('h2',{},'Ajouter mon souvenir'), ta, h('div',{style:'height:10px'}), recBox, trBox, h('div',{style:'height:10px'}), send, status);
+  idle();
+}
+function toB64(blob){ return new Promise((res,rej)=>{ const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); }); }
+function stopRecCleanup(){ if (rec){ try{ rec.mr.onstop = null; rec.mr.stop(); rec.stream.getTracks().forEach(t=>t.stop()); clearInterval(rec.timer);}catch(e){} rec = null; } }
+
+
+/* ========= Navigation ========= */
+function pendingCount(){ return S.depots.filter(d => d.statut === 'en_attente').length; }
+function drawNav(){
+  const nav = document.getElementById('nav'); if (!S.me) { nav.replaceChildren(); return; }
+  const nNew = S.depots.filter(d => d.statut === 'valide').length;
+  const b = (id, label, fn, badge) => h('button',{'aria-current': S.tab===id ? 'page' : null, onclick:fn}, label, badge ? h('span',{class:'n'}, String(badge)) : null);
+  nav.replaceChildren(
+    b('photos','Photos', showGallery),
+    b('new','Nouveautés'+(nNew?' ('+nNew+')':''), showNew),
+    b('upload','＋ Ajouter des photos', showUpload),
+    S.me.role==='admin' ? b('review','À valider', showReview, pendingCount()) : null,
+    S.me.role==='admin' ? b('msg','✉ Message', showMessages) : null);
+}
+async function refreshDepots(){ try { S.depots = await api('listDepots'); } catch(e){} drawNav(); }
+
+/* ========= Nouveautés (dépôts validés + mes dépôts) ========= */
+function depotTitle(d){ return d.description || ('Photo déposée par '+d.deposant); }
+function depotTile(d, reload){
+  const ph = h('div',{class:'ph','data-id':d.id},'…');
+  const st = d.statut==='en_attente' ? h('span',{class:'status wait'},'En attente de validation') : d.statut==='refuse' ? h('span',{class:'status no'},'Non retenue') : null;
+  const open = () => { if (d.statut==='refuse') return; S.scroll = window.scrollY;
+    showPhoto({id:d.id, tags:[], when:'', title:depotTitle(d), sub:'Déposée par '+d.deposant+' le '+fdate(d.date), nbComm:d.nbComm}); };
+  const del = (d.mine && d.statut!=='valide') || S.me.role==='admin' ? h('button',{class:'btn small danger',style:'margin:0 12px 12px',onclick:async e=>{
+      if (!confirm('Retirer cette photo ?')) return; e.target.disabled = true;
+      try { await api('depotDelete', d.depotId); await refreshDepots(); reload(); } catch(x){ e.target.disabled=false; alert(x.message); } }},'Retirer') : null;
+  return h('div',{class:'tile'},
+    h('button',{class:'tile',style:'border:0;background:none;text-align:left;padding:0;width:100%',onclick:open,'aria-label':depotTitle(d)}, ph,
+      h('div',{class:'cap'}, h('span',{class:'when'}, 'Par '+d.deposant), h('span',{class:'who2'}, d.description || 'Sans description'),
+        h('span',{class:'hint'}, fdate(d.date)), st, d.statut==='valide' ? h('span',{class:'badge'+(d.nbComm?'':' zero')}, d.nbComm ? '💬 '+d.nbComm : 'Aucun commentaire') : null)),
+    del);
+}
+async function showNew(){
+  S.tab = 'new'; S.back = showNew; view = 'new'; drawNav();
+  $app.replaceChildren(h('div',{class:'center'},'Chargement…'));
+  await refreshDepots();
+  const valid = S.depots.filter(d => d.statut==='valide');
+  const mine = S.depots.filter(d => d.mine && d.statut!=='valide');
+  const grid = h('div',{class:'grid'}, valid.map(d => depotTile(d, showNew)));
+  $app.replaceChildren(
+    h('h2',{},'Nouveautés de la famille'),
+    valid.length ? grid : h('p',{class:'hint'},'Aucune photo ajoutée par la famille pour l’instant. Vous avez une photo à partager ? Utilisez « Ajouter des photos ».'),
+    mine.length ? h('div',{}, h('h2',{},'Mes dépôts en cours'), h('div',{class:'grid'}, mine.map(d => depotTile(d, showNew)))) : null);
+  observe($app);
+}
+
+/* ========= Validation (administrateur) ========= */
+async function showReview(){
+  S.tab = 'review'; S.back = showReview; view = 'review'; drawNav();
+  await refreshDepots();
+  const list = S.depots.filter(d => d.statut==='en_attente');
+  const box = h('div',{class:'review'});
+  list.forEach(d => {
+    const ph = h('div',{class:'ph','data-id':d.id},'…');
+    const card = h('div',{class:'panel'}, ph,
+      h('b',{}, 'Déposée par '+d.deposant), h('div',{class:'hint'}, fdate(d.date)), h('div',{class:'c-text'}, d.description || 'Sans description'),
+      h('div',{class:'row'},
+        h('button',{class:'btn primary',onclick:e=>decide(d,'valide',card,e.target)},'✔ Valider'),
+        h('button',{class:'btn danger',onclick:e=>decide(d,'refuse',card,e.target)},'✖ Refuser')));
+    box.append(card);
+  });
+  $app.replaceChildren(h('h2',{},'Photos à valider ('+list.length+')'), list.length ? box : h('p',{class:'hint'},'Rien à valider pour le moment.'));
+  observe($app);
+}
+async function decide(d, decision, card, btn){
+  btn.disabled = true;
+  try { await api('depotDecide', d.depotId, decision); card.remove(); await refreshDepots(); const h2 = $app.querySelector('h2'); if (h2) h2.textContent = 'Photos à valider ('+pendingCount()+')'; }
+  catch(e){ btn.disabled = false; card.append(h('div',{class:'msg err'}, e.message)); }
+}
+
+/* ========= Ajouter des photos ========= */
+async function shrink(file, max){
+  let bmp;
+  try { bmp = await createImageBitmap(file, {imageOrientation:'from-image'}); }
+  catch(e){ bmp = await new Promise((res,rej)=>{ const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }); }
+  const w = bmp.width || bmp.naturalWidth, hh = bmp.height || bmp.naturalHeight, k = Math.min(1, max/Math.max(w,hh));
+  const c = document.createElement('canvas'); c.width = Math.round(w*k); c.height = Math.round(hh*k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.85));
+  return { blob, b64: await toB64(blob), url: URL.createObjectURL(blob) };
+}
+function showUpload(){
+  S.tab = 'upload'; S.back = showUpload; view = 'upload'; drawNav(); window.scrollTo(0,0);
+  let files = [];
+  const input = h('input',{type:'file',accept:'image/*',multiple:true,class:'sr',id:'file',onchange:e=>{ files = [...e.target.files]; drawPrev(); }});
+  const prev = h('div',{class:'previews'}); const status = h('div');
+  const desc = h('textarea',{placeholder:'Qui est sur la photo ? Où ? Quand (même approximatif) ? Une anecdote ?','aria-label':'Description'});
+  const send = h('button',{class:'btn primary big',onclick:go,disabled:true},'Envoyer');
+  function drawPrev(){
+    prev.replaceChildren(...files.map((f,i) => { const d = h('div',{'data-i':i}, h('img',{src:URL.createObjectURL(f),alt:''}), h('span',{class:'st'},'')); return d; }));
+    send.disabled = !files.length; send.textContent = files.length ? 'Envoyer '+files.length+(files.length>1?' photos':' photo') : 'Envoyer';
+  }
+  async function go(){
+    send.disabled = true; status.replaceChildren(); let ok = 0;
+    for (let i = 0; i < files.length; i++){
+      const st = prev.querySelector('[data-i="'+i+'"] .st'); st.textContent = 'Préparation…';
+      try {
+        const sm = await shrink(files[i], 2200); st.textContent = 'Envoi…';
+        await api('upload', { name: files[i].name, mime: 'image/jpeg', b64: sm.b64, description: desc.value });
+        st.textContent = '✔ Envoyée'; ok++;
+      } catch(e){ st.textContent = '✖ Échec'; status.append(h('div',{class:'msg err'}, files[i].name+' : '+e.message)); }
+    }
+    if (ok) { status.prepend(h('div',{class:'msg'}, 'Merci ! '+ok+(ok>1?' photos reçues':' photo reçue')+'. Mathieu les validera avant qu’elles apparaissent pour toute la famille.')); files = files.filter((f,i)=> prev.querySelector('[data-i="'+i+'"] .st').textContent !== '✔ Envoyée'); input.value=''; refreshDepots(); }
+    send.disabled = !files.length;
+  }
+  $app.replaceChildren(
+    h('h2',{},'Ajouter des photos'),
+    h('p',{}, 'Partagez des photos de famille : elles seront relues par Mathieu avant d’être publiées.'),
+    h('label',{class:'drop',for:'file'}, '📷 Choisir des photos (appareil photo ou galerie)'), input, prev,
+    h('div',{class:'panel'}, h('h2',{},'Description (facultative)'), desc, h('p',{class:'hint'},'Elle s’applique à toutes les photos choisies.')),
+    send, status,
+    h('div',{class:'panel'}, h('h2',{},'Photographier une vieille photo papier'), h('p',{class:'hint'},'Posez-la à plat, près d’une fenêtre, sans flash ni reflet, bien de face. Mieux vaut l’apporter à Mathieu pour un scan de qualité si elle est précieuse.')));
+}
+
+/* ========= Pont avec l'application Android (APK) ========= */
+function bridgeApp(){
+  try { if (window.PFApp && CODE) window.PFApp.saveCredentials(CODE, window.PF_API_URL); } catch(e){}
+}
+
+/* ========= Messages de l'administrateur ========= */
+function unseenMsg(){
+  const m = S.msgs[0]; if (!m) return null;
+  return store('pf_msg_seen') === m.id ? null : m;
+}
+function msgBanner(){
+  const m = unseenMsg(); if (!m) return null;
+  const b = h('div',{class:'banner',role:'status'}, h('div',{class:'t'}, h('small',{},'Message de Mathieu · '+fdate(m.date)), m.texte),
+    h('button',{class:'btn small',onclick:()=>{ store('pf_msg_seen', m.id); b.remove(); }},'J’ai lu'));
+  return b;
+}
+async function showMessages(){
+  S.tab = 'msg'; S.back = showMessages; view = 'msg'; drawNav(); window.scrollTo(0,0);
+  const ta = h('textarea',{maxlength:500,placeholder:'Un mot pour toute la famille (500 caractères maximum)…','aria-label':'Message'});
+  const status = h('div'); const list = h('div');
+  const send = h('button',{class:'btn primary big',onclick:async()=>{
+    if (!ta.value.trim()) return; send.disabled = true; status.replaceChildren();
+    try { await api('postMessage', ta.value); ta.value=''; status.replaceChildren(h('div',{class:'msg'},'Message envoyé. Il s’affichera dans l’appli et sera notifié sur les téléphones équipés de l’application Android (dans l’heure).')); await reload(); }
+    catch(e){ status.replaceChildren(h('div',{class:'msg err'}, e.message)); }
+    send.disabled = false; }},'Envoyer à la famille');
+  async function reload(){
+    try { S.msgs = await api('messages'); } catch(e){}
+    list.replaceChildren(h('h2',{},'Messages envoyés'), S.msgs.length ? S.msgs.map(m => h('div',{class:'comment'},
+      h('div',{class:'c-head'}, h('time',{}, fdate(m.date))), h('div',{class:'c-text'}, m.texte),
+      h('div',{class:'c-actions'}, h('button',{class:'btn small danger',onclick:async()=>{ try{ await api('deleteMessage', m.id); reload(); }catch(e){ alert(e.message); } }},'Supprimer')))) : h('p',{class:'hint'},'Aucun message.'));
+  }
+  $app.replaceChildren(h('h2',{},'Message à la famille'), h('div',{class:'panel'}, ta, h('div',{style:'height:10px'}), send, status), h('div',{class:'panel'}, list));
+  reload();
+}
+
+/* ========= Diaporama ========= */
+async function loadSynths(){ try { S.synths = await api('synths'); } catch(e){} }
+function prefs(){ try { return Object.assign({tempo:8, random:false, speak:true, rate:1}, JSON.parse(store('pf_ss')||'{}')); } catch(e){ return {tempo:8, random:false, speak:true, rate:1}; } }
+function savePrefs(p){ store('pf_ss', JSON.stringify(p)); }
+
+async function setBan(id, banned){
+  if (banned) S.bans.add(id); else S.bans.delete(id);
+  try { await api('setBan', id, banned); } catch(e){ if (banned) S.bans.delete(id); else S.bans.add(id); throw e; }
+}
+function banToggle(p){
+  const b = h('button',{class:'btn small',style:'margin:0 0 6px',onclick:async()=>{
+    const to = !S.bans.has(p.id); b.disabled = true;
+    try { await setBan(p.id, to); draw(); } catch(e){ alert(e.message); } b.disabled = false; }});
+  function draw(){ b.textContent = S.bans.has(p.id) ? '🚫 Masquée du diaporama (rétablir)' : '🚫 Ne pas montrer dans mon diaporama'; }
+  draw(); return b;
+}
+
+function showSlideshowSetup(){
+  view = 'ss-setup'; window.scrollTo(0,0);
+  const pr = prefs();
+  const base = filtered();
+  const usable = base.filter(p => !S.bans.has(p.id));
+  const tempo = h('input',{type:'range',class:'range',min:4,max:40,step:1,value:pr.tempo,'aria-label':'Durée d’affichage'});
+  const tl = h('b',{}, pr.tempo+' s');
+  tempo.oninput = () => { tl.textContent = tempo.value+' s'; };
+  const rnd = h('input',{type:'checkbox',id:'o-rnd'}); rnd.checked = pr.random;
+  const spk = h('input',{type:'checkbox',id:'o-spk'}); spk.checked = pr.speak && 'speechSynthesis' in window;
+  if (!('speechSynthesis' in window)) spk.disabled = true;
+  const withSynth = usable.filter(p => S.synths[p.id]).length;
+  const filt = S.person || S.dec || S.q ? ' (selon le filtre actuel : '+[S.person && tagLabel(S.person), S.dec, S.q].filter(Boolean).join(', ')+')' : '';
+  const go = h('button',{class:'btn primary big',disabled:!usable.length,onclick:()=>{
+    const np = {tempo:+tempo.value, random:rnd.checked, speak:spk.checked, rate:pr.rate}; savePrefs(np); startSlideshow(usable, np); }},
+    usable.length ? '▶ Démarrer le diaporama ('+usable.length+' photos)' : 'Aucune photo à afficher');
+  const bans = h('div');
+  function drawBans(){
+    const banned = S.photos.filter(p => S.bans.has(p.id));
+    bans.replaceChildren(h('h2',{},'Photos masquées de mon diaporama ('+banned.length+')'),
+      banned.length ? h('div',{class:'banlist'}, banned.map(p => {
+        const ph = h('div',{class:'ph','data-id':p.id},'…');
+        return h('div',{class:'it'}, ph, h('div',{class:'hint',style:'padding:4px 8px'}, whenLabel(p.when)+' · '+p.tags.slice(0,2).map(tagLabel).join(', ')),
+          h('button',{class:'btn',onclick:async e=>{ e.target.disabled=true; try{ await setBan(p.id,false); drawBans(); showSlideshowSetup.refresh && 0; }catch(x){ alert(x.message); e.target.disabled=false; } }},'Rétablir')); }))
+        : h('p',{class:'hint'},'Aucune. Pendant le diaporama, le bouton « Ne plus afficher » masque une photo, pour vous seulement.'));
+    observe(bans);
+  }
+  $app.replaceChildren(
+    h('button',{class:'btn back',onclick:showGallery},'← Retour aux photos'),
+    h('h2',{},'Diaporama'),
+    h('p',{class:'hint'}, usable.length+' photo'+(usable.length>1?'s':'')+filt+', dont '+withSynth+' avec un résumé à écouter.'),
+    h('div',{class:'panel'},
+      h('h2',{},'Durée d’affichage de chaque photo : ', tl), tempo,
+      h('p',{class:'hint'},'Si la lecture à voix haute est active, l’appli attend la fin du résumé avant de passer à la suite.'),
+      h('label',{class:'opt',for:'o-rnd'}, rnd, 'Ordre aléatoire'),
+      h('label',{class:'opt',for:'o-spk'}, spk, 'Lire le résumé des commentaires à voix haute')),
+    go, h('div',{class:'panel'}, bans));
+  drawBans();
+}
+
+let SSX = null; // état du diaporama en cours
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function speakText(text, rate, onEnd){
+  const synth = window.speechSynthesis;
+  let finished = false, cancelled = false, watchdog = null;
+  const finish = () => { if (finished || cancelled) return; finished = true; clearTimeout(watchdog); onEnd(); };
+  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { setTimeout(finish, 0); return () => {}; }
+  const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).reduce((acc, s) => { const last = acc[acc.length-1]; if (last && (last + s).length < 220) acc[acc.length-1] = last + s; else acc.push(s); return acc; }, []);
+  let voice = null; try { voice = (synth.getVoices() || []).find(v => /^fr/i.test(v.lang)); } catch(e){}
+  let i = 0;
+  function next(){
+    if (cancelled || finished) return;
+    if (i >= parts.length) return finish();
+    try {
+      const u = new SpeechSynthesisUtterance(parts[i++].trim());
+      u.lang = 'fr-FR'; if (voice) u.voice = voice; u.rate = rate || 1;
+      u.onend = next; u.onerror = finish;
+      synth.speak(u);
+    } catch(e){ finish(); }
+  }
+  // Garde-fou : certains navigateurs ne signalent jamais la fin de la lecture.
+  watchdog = setTimeout(finish, Math.max(6000, text.length * 110 / (rate || 1)) + 4000);
+  try { synth.cancel(); } catch(e){}
+  next();
+  return () => { cancelled = true; clearTimeout(watchdog); try { synth.cancel(); } catch(e){} };
+}
+
+function startSlideshow(list, pr){
+  if (!list.length) return;
+  const root = h('div',{class:'ss',role:'dialog','aria-label':'Diaporama'});
+  const stage = h('div',{class:'ss-stage'}); const prog = h('div',{class:'ss-progress'}, h('i'));
+  const title = h('h2'), sub = h('div',{class:'sub'}), text = h('div',{class:'ss-text','aria-live':'polite'}), bar = h('div',{class:'ss-bar'});
+  const cap = h('div',{class:'ss-cap'}, title, sub, text, bar);
+  root.append(stage, prog, cap); document.body.append(root); document.body.style.overflow = 'hidden';
+  const st = SSX = { list: pr.random ? shuffle(list) : list.slice(), i: 0, playing: true, pr, root, imgs: new Map(), stopSpeech: null, timer: null, minDone: false, speechDone: true, token: 0, idleT: null, wake: null };
+
+  function getImg(id){
+    if (!st.imgs.has(id)) { const pm = api('image', id, 'big'); st.imgs.set(id, pm); pm.catch(()=>st.imgs.delete(id));
+      if (st.imgs.size > 6) st.imgs.delete(st.imgs.keys().next().value); }
+    return st.imgs.get(id);
+  }
+  function clearTimers(){ clearTimeout(st.timer); if (st.stopSpeech) { st.stopSpeech(); st.stopSpeech = null; } const bar = prog.firstChild; bar.style.transition = 'none'; bar.style.width = '0'; }
+  function tryAdvance(token){ if (token === st.token && st.playing && st.minDone && st.speechDone) setTimeout(()=>{ if (token === st.token && st.playing) go(1); }, 1200); }
+
+  async function show(){
+    clearTimers(); const token = ++st.token; const p = st.list[st.i];
+    title.textContent = p.tags.map(tagLabel).join(', ') || 'Photo'; sub.textContent = whenLabel(p.when) + (S.synths[p.id] ? '' : '');
+    text.textContent = ''; stage.replaceChildren(h('div',{class:'ss-load'},'Chargement…'));
+    try {
+      const src = await getImg(p.id); if (token !== st.token) return;
+      const im = new Image(); im.alt = title.textContent; im.src = src; stage.replaceChildren(im);
+    } catch(e){ if (token !== st.token) return; stage.replaceChildren(h('div',{class:'ss-load'},'Photo indisponible')); }
+    // précharger les 2 suivantes
+    for (let k = 1; k <= 2; k++) { const q = st.list[(st.i + k) % st.list.length]; if (q) getImg(q.id).catch(()=>{}); }
+    if (!st.playing) return;
+    startTimers(token, p);
+  }
+  function startTimers(token, p){
+    st.minDone = false; st.speechDone = true;
+    const b = prog.firstChild; b.style.transition = 'none'; b.style.width = '0'; void b.offsetWidth; b.style.transition = 'width '+pr.tempo+'s linear'; b.style.width = '100%';
+    const syn = S.synths[p.id];
+    if (syn) text.textContent = syn;
+    if (syn && pr.speak) { st.speechDone = false; st.stopSpeech = speakText(syn, pr.rate, () => { if (token === st.token) { st.speechDone = true; tryAdvance(token); } }); }
+    st.timer = setTimeout(() => { if (token === st.token) { st.minDone = true; tryAdvance(token); } }, pr.tempo * 1000);
+  }
+  function go(d){
+    st.i += d;
+    if (st.i >= st.list.length) { st.i = 0; if (pr.random) st.list = shuffle(st.list); }
+    if (st.i < 0) st.i = st.list.length - 1;
+    show();
+  }
+  function setPlaying(v){
+    st.playing = v; renderBar();
+    if (v) show(); else { clearTimers(); st.token++; }
+  }
+  function toast(msg, undo){
+    const t = h('div',{class:'ss-toast',role:'status'}, msg, undo ? h('button',{onclick:()=>{ undo(); t.remove(); }},'Annuler') : null);
+    root.append(t); setTimeout(()=>t.remove(), 6000);
+  }
+  async function ban(){
+    const p = st.list[st.i]; if (st.list.length <= 1) { toast('C’est la dernière photo du diaporama.'); return; }
+    try { await setBan(p.id, true); } catch(e){ toast(e.message); return; }
+    st.list.splice(st.i, 1); if (st.i >= st.list.length) st.i = 0;
+    toast('Photo masquée de votre diaporama.', async () => { try { await setBan(p.id, false); st.list.splice(st.i, 0, p); } catch(e){} });
+    show();
+  }
+  function close(){
+    clearTimers(); st.token++; clearTimeout(st.idleT); try { st.wake && st.wake.release(); } catch(e){}
+    document.removeEventListener('keydown', onKey); root.remove(); document.body.style.overflow = ''; SSX = null;
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch(e){}
+    showGallery();
+  }
+  function renderBar(){
+    bar.replaceChildren(
+      h('button',{onclick:()=>go(-1),'aria-label':'Photo précédente'},'⏮'),
+      h('button',{class:'main',onclick:()=>setPlaying(!st.playing),'aria-label':st.playing?'Pause':'Lecture'}, st.playing ? '⏸ Pause' : '▶ Lecture'),
+      h('button',{onclick:()=>go(1),'aria-label':'Photo suivante'},'⏭'),
+      h('button',{'aria-pressed':String(pr.speak),onclick:e=>{ pr.speak = !pr.speak; savePrefs(pr); if (!pr.speak && st.stopSpeech) { st.stopSpeech(); st.stopSpeech=null; st.speechDone = true; } renderBar(); }}, pr.speak ? '🔊 Voix' : '🔈 Muet'),
+      h('button',{onclick:ban},'🚫 Ne plus afficher'),
+      h('button',{onclick:close,'aria-label':'Fermer le diaporama'},'✕ Fermer'));
+  }
+  function wake(){ cap.classList.remove('hide'); root.classList.remove('idle'); clearTimeout(st.idleT); st.idleT = setTimeout(()=>root.classList.add('idle'), 4000); }
+  function onKey(e){
+    if (e.key === 'Escape') close(); else if (e.key === ' ') { e.preventDefault(); setPlaying(!st.playing); }
+    else if (e.key === 'ArrowRight') go(1); else if (e.key === 'ArrowLeft') go(-1); else if (e.key.toLowerCase() === 'b') ban();
+    wake();
+  }
+  document.addEventListener('keydown', onKey);
+  root.addEventListener('pointermove', wake); root.addEventListener('pointerdown', wake);
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(w => { st.wake = w; }).catch(()=>{}); } catch(e){}
+  try { if (root.requestFullscreen) root.requestFullscreen().catch(()=>{}); } catch(e){}
+  renderBar(); wake(); show();
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+boot();
+</script>
+</body>
+</html>
