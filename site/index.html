@@ -270,7 +270,15 @@ function tile(p){
       h('span',{class:'who2'},p.tags.map(tagLabel).join(', ')),
       h('span',{class:'badge'+(p.nbComm?'':' zero')}, p.nbComm ? '💬 '+p.nbComm+(p.hasSynth?' · résumé':'') : 'Aucun commentaire')));
 }
-/* Chargement paresseux des miniatures, 3 à la fois */
+/* Chargement paresseux des miniatures, 6 à la fois */
+/* Miniatures mémorisées sur l'appareil (IndexedDB) : seule la première visite est lente */
+const idb = (() => { let p = null;
+  function open(){ return p || (p = new Promise((res, rej) => { try { const r = indexedDB.open('pf-thumbs', 1); r.onupgradeneeded = () => r.result.createObjectStore('t'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch(e){ rej(e); } })); }
+  return {
+    get: id => open().then(db => new Promise(res => { const q = db.transaction('t').objectStore('t').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); })).catch(() => null),
+    put: (id, v) => open().then(db => { db.transaction('t','readwrite').objectStore('t').put(v, id); }).catch(() => {})
+  };
+})();
 let io, queue = [], active = 0;
 function observe(root){
   if (io) io.disconnect();
@@ -283,9 +291,11 @@ function observe(root){
 function setImg(el, src){ el.replaceChildren(h('img',{src, alt:'', loading:'lazy'})); }
 function enqueue(el){ queue.push(el); pump(); }
 function pump(){
-  while (active < 3 && queue.length){
+  while (active < 6 && queue.length){
     const el = queue.shift(); active++;
-    api('image', el.dataset.id, 'thumb').then(src => { S.thumbs.set(el.dataset.id, src); if (el.isConnected) setImg(el, src); })
+    const id = el.dataset.id;
+    idb.get(id).then(saved => saved || api('image', id, 'thumb').then(src => { idb.put(id, src); return src; }))
+      .then(src => { S.thumbs.set(id, src); if (el.isConnected) setImg(el, src); })
       .catch(()=>{ if (el.isConnected) el.textContent = 'Aperçu indisponible'; })
       .finally(()=>{ active--; pump(); });
   }
